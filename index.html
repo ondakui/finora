@@ -158,7 +158,7 @@
     background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; color: #555;
   }
   .card-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--off-white); }
-  .card-btn.primary { background: var(--navy); color: var(--gold-light); border-color: var(--navy); }
+  .card-btn.primary { background: var(--navy); color: var(--gold-light); border-color: var(--navy); text-decoration: none; }
   .card-btn.primary:hover { background: var(--navy-light); }
 
   /* DONATION */
@@ -294,18 +294,18 @@
 
 <script>
 const resources = [
-  { title: "Your first budget in 30 minutes", desc: "A step-by-step worksheet to plan income vs. expenses, even on a tight income.", type: "pdf", category: "budgeting", accent: "#c9a84c" },
-  { title: "The 50/30/20 rule explained", desc: "Watch how to split your paycheck for needs, wants, and savings — with real examples.", type: "video", category: "budgeting", accent: "#e8a020" },
-  { title: "How to open a bank account with no fees", desc: "Understand free checking options, online banks, and what to watch out for.", type: "read", category: "banking", accent: "#1d9e75" },
-  { title: "Understanding your credit score", desc: "What it is, why it matters, and five things that affect it starting today.", type: "video", category: "credit", accent: "#e8a020" },
-  { title: "Getting out of debt: a starter plan", desc: "Compare the avalanche vs. snowball methods and find one that works for you.", type: "pdf", category: "debt", accent: "#c9a84c" },
-  { title: "Emergency fund basics", desc: "Why $1,000 can change your life and how to start saving it this month.", type: "read", category: "saving", accent: "#1d9e75" },
-  { title: "Investing 101 — no jargon", desc: "Stocks, bonds, index funds — plain language explainer for total beginners.", type: "video", category: "investing", accent: "#e8a020" },
-  { title: "Free tax filing resources", desc: "VITA sites, IRS Free File, and other ways to file for free if you qualify.", type: "read", category: "taxes", accent: "#1d9e75" },
-  { title: "Renting vs. buying — what makes sense now", desc: "A simple calculator-style guide to help you think through your housing options.", type: "pdf", category: "housing", accent: "#c9a84c" },
-  { title: "Building credit from scratch", desc: "Secured cards, credit-builder loans, and becoming an authorized user explained.", type: "video", category: "credit", accent: "#e8a020" },
-  { title: "How savings accounts really work", desc: "APY, compound interest, and which type of account is best for short-term goals.", type: "read", category: "saving", accent: "#1d9e75" },
-  { title: "Paycheck breakdown worksheet", desc: "Download this fillable PDF to understand exactly where your money goes each month.", type: "pdf", category: "budgeting", accent: "#c9a84c" },
+  { title: "Your first budget in 30 minutes", desc: "A step-by-step worksheet to plan income vs. expenses, even on a tight income.", type: "pdf", category: "budgeting", accent: "#c9a84c", link: "https://consumer.gov/system/files/consumer_gov/pdf/1041A_BudgetWorksheet-508.pdf" },
+  { title: "The 50/30/20 rule explained", desc: "Watch how to split your paycheck for needs, wants, and savings — with real examples.", type: "video", category: "budgeting", accent: "#e8a020", link: "https://www.youtube.com/watch?v=b9iwISYBI-g" },
+  { title: "How to open a bank account with no fees", desc: "Understand free checking options, online banks, and what to watch out for.", type: "read", category: "banking", accent: "#1d9e75", link: "https://www.fdic.gov/getbanked" },
+  { title: "Understanding your credit score", desc: "What it is, why it matters, and five things that affect it starting today.", type: "video", category: "credit", accent: "#e8a020", link: "https://www.youtube.com/watch?v=1w_SM2RXTWA" },
+  { title: "Getting out of debt: a starter plan", desc: "Compare the avalanche vs. snowball methods and find one that works for you.", type: "read", category: "debt", accent: "#c9a84c", link: "https://www.fidelity.com/learning-center/personal-finance/avalanche-snowball-debt" },
+  { title: "Emergency fund basics", desc: "Why $1,000 can change your life and how to start saving it this month.", type: "read", category: "saving", accent: "#1d9e75", link: "https://www.khanacademy.org/economics-finance-domain/core-finance/stock-and-bonds" },
+  { title: "Investing 101 — no jargon", desc: "Stocks, bonds, index funds — plain language explainer for total beginners.", type: "video", category: "investing", accent: "#e8a020", link: "https://www.khanacademy.org/economics-finance-domain/core-finance/stock-and-bonds" },
+  { title: "Free tax filing resources", desc: "VITA sites, IRS Free File, and other ways to file for free if you qualify.", type: "read", category: "taxes", accent: "#1d9e75", link: "https://www.irs.gov/file-your-taxes-for-free" },
+  { title: "Renting vs. buying — what makes sense now", desc: "A simple calculator-style guide to help you think through your housing options.", type: "read", category: "housing", accent: "#c9a84c", link: "https://consumer.ftc.gov/articles/understanding-your-credit" },
+  { title: "Building credit from scratch", desc: "Secured cards, credit-builder loans, and becoming an authorized user explained.", type: "read", category: "credit", accent: "#e8a020", link: "https://www.cnbc.com/select/guide/credit-scores-for-beginners/" },
+  { title: "How savings accounts really work", desc: "APY, compound interest, and which type of account is best for short-term goals.", type: "read", category: "saving", accent: "#1d9e75", link: "https://www.nerdwallet.com/finance/learn/budget-worksheet" },
+  { title: "Paycheck breakdown worksheet", desc: "Download this fillable PDF to understand exactly where your money goes each month.", type: "pdf", category: "budgeting", accent: "#c9a84c", link: "https://www.ramseysolutions.com/budgeting/budget-template" },
 ];
 
 let activeFilter = 'all';
@@ -315,10 +315,11 @@ function typeLabel(t) {
   if (t === 'pdf')   return '<span class="card-type-badge badge-pdf"><i class="ti ti-file-text" aria-hidden="true"></i> Download</span>';
   return '<span class="card-type-badge badge-read"><i class="ti ti-book" aria-hidden="true"></i> Read</span>';
 }
-function actionBtn(t) {
-  if (t === 'video') return '<button class="card-btn primary"><i class="ti ti-player-play" aria-hidden="true"></i> Watch</button>';
-  if (t === 'pdf')   return '<button class="card-btn primary"><i class="ti ti-download" aria-hidden="true"></i> Download</button>';
-  return '<button class="card-btn primary"><i class="ti ti-arrow-right" aria-hidden="true"></i> Read</button>';
+function actionBtn(type, link) {
+  if (!link) return '';
+  if (type === 'video') return `<a href="${link}" target="_blank" rel="noopener" class="card-btn primary"><i class="ti ti-player-play" aria-hidden="true"></i> Watch</a>`;
+  if (type === 'pdf')   return `<a href="${link}" target="_blank" rel="noopener" class="card-btn primary"><i class="ti ti-download" aria-hidden="true"></i> Download</a>`;
+  return `<a href="${link}" target="_blank" rel="noopener" class="card-btn primary"><i class="ti ti-arrow-right" aria-hidden="true"></i> Read</a>`;
 }
 
 function renderCards(list) {
@@ -336,7 +337,7 @@ function renderCards(list) {
         <span class="card-category"><i class="ti ti-tag" aria-hidden="true" style="font-size:12px;margin-right:3px"></i>${r.category}</span>
         <div class="card-actions">
           <button class="card-btn"><i class="ti ti-bookmark" aria-hidden="true"></i></button>
-          ${actionBtn(r.type)}
+          ${actionBtn(r.type, r.link)}
         </div>
       </div>
     </div>

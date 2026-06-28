@@ -143,6 +143,18 @@
   .footer-logo span { color: var(--gold); }
   .footer-note { font-size: 12px; color: #aaa; }
   .empty-msg { color: #aaa; font-size: 13px; padding: 1rem 0; }
+
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .lang-switcher {
+    display: flex; align-items: center; gap: 2px;
+    background: rgba(255,255,255,0.08); border-radius: 8px; padding: 3px 5px;
+  }
+  .lang-btn {
+    background: none; border: none; color: #c8d8f0; font-size: 11px; font-weight: 600;
+    cursor: pointer; padding: 3px 7px; border-radius: 5px; opacity: 0.6; transition: all 0.15s;
+  }
+  .lang-btn:hover { opacity: 1; }
+  .lang-btn.active { background: var(--gold); color: var(--navy); opacity: 1; }
 </style>
 </head>
 <body>
@@ -152,9 +164,17 @@
       <i class="ti ti-chart-line" aria-hidden="true" style="font-size:20px"></i>
       Finora <span>Free knowledge for everyone</span>
     </div>
-    <button class="nav-donate-btn" onclick="document.getElementById('donate').scrollIntoView({behavior:'smooth'})">
-      <i class="ti ti-heart" style="font-size:12px;margin-right:4px" aria-hidden="true"></i> Donate
-    </button>
+    <div class="nav-right">
+      <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLang('en',this)">EN</button>
+        <button class="lang-btn" onclick="setLang('es',this)">ES</button>
+        <button class="lang-btn" onclick="setLang('fr',this)">FR</button>
+        <button class="lang-btn" onclick="setLang('pt',this)">PT</button>
+      </div>
+      <button class="nav-donate-btn" onclick="document.getElementById('donate').scrollIntoView({behavior:'smooth'})">
+        <i class="ti ti-heart" style="font-size:12px;margin-right:4px" aria-hidden="true"></i> Donate
+      </button>
+    </div>
   </nav>
 
   <div class="hero">
@@ -166,17 +186,24 @@
   <div class="category-tabs" id="categoryTabs">
     <button class="cat-tab active" onclick="setCategory('money',this)" style="--tab-color:#c9a84c"><i class="ti ti-coin" aria-hidden="true"></i> Money</button>
     <button class="cat-tab" onclick="setCategory('life',this)" style="--tab-color:#3b82f6"><i class="ti ti-sparkles" aria-hidden="true"></i> Life Skills</button>
+    <button class="cat-tab" onclick="setCategory('women',this)" style="--tab-color:#ec4899"><i class="ti ti-venus" aria-hidden="true"></i> Women</button>
+    <button class="cat-tab" onclick="setCategory('men',this)" style="--tab-color:#0ea5e9"><i class="ti ti-mars" aria-hidden="true"></i> Men</button>
+    <button class="cat-tab" onclick="setCategory('parenting',this)" style="--tab-color:#f59e0b"><i class="ti ti-baby-carriage" aria-hidden="true"></i> Parenting</button>
     <button class="cat-tab" onclick="setCategory('health',this)" style="--tab-color:#22c55e"><i class="ti ti-heart-rate-monitor" aria-hidden="true"></i> Health</button>
     <button class="cat-tab" onclick="setCategory('work',this)" style="--tab-color:#a855f7"><i class="ti ti-briefcase" aria-hidden="true"></i> Work</button>
     <button class="cat-tab" onclick="setCategory('food',this)" style="--tab-color:#f97316"><i class="ti ti-bowl-chopsticks" aria-hidden="true"></i> Food</button>
     <button class="cat-tab" onclick="setCategory('tech',this)" style="--tab-color:#06b6d4"><i class="ti ti-device-laptop" aria-hidden="true"></i> Tech</button>
+    <button class="cat-tab" onclick="setCategory('mental',this)" style="--tab-color:#8b5cf6"><i class="ti ti-brain" aria-hidden="true"></i> Mental Health</button>
+    <button class="cat-tab" onclick="setCategory('legal',this)" style="--tab-color:#64748b"><i class="ti ti-scale" aria-hidden="true"></i> Legal Basics</button>
+    <button class="cat-tab" onclick="setCategory('relationships',this)" style="--tab-color:#f43f5e"><i class="ti ti-heart-handshake" aria-hidden="true"></i> Relationships</button>
+    <button class="cat-tab" onclick="setCategory('housing',this)" style="--tab-color:#0d9488"><i class="ti ti-home" aria-hidden="true"></i> Housing</button>
   </div>
 
   <div class="stats-bar">
     <div class="stat"><div class="stat-num" id="statCount">12</div><div class="stat-label">Resources</div></div>
     <div class="stat"><div class="stat-num" id="statTopics">8</div><div class="stat-label">Topics</div></div>
     <div class="stat"><div class="stat-num">Free</div><div class="stat-label">Always</div></div>
-    <div class="stat"><div class="stat-num">EN</div><div class="stat-label">Language</div></div>
+    <div class="stat"><div class="stat-num" id="statLang">EN</div><div class="stat-label">Language</div></div>
   </div>
 
   <div class="section" id="resources">
@@ -185,6 +212,9 @@
       <div class="section-title"><span id="sectionTitleText">Money</span> resources</div>
     </div>
     <div class="section-sub" id="sectionSub"></div>
+    <div id="langNotice" style="display:none;margin-bottom:0.8rem">
+      <span id="langNoticeText" style="font-size:11px;color:#888;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);padding:4px 12px;border-radius:99px;display:inline-block"></span>
+    </div>
     <div class="search-row">
       <div class="search-box">
         <i class="ti ti-search" aria-hidden="true"></i>
@@ -207,7 +237,7 @@
         <button class="amount-btn" onclick="selectAmount(this,25)">$25</button>
         <button class="amount-btn" onclick="selectAmount(this,50)">$50</button>
       </div>
-      <button class="donate-cta" onclick="alert('Add your donation link here!')">
+      <button class="donate-cta" onclick="openDonation()">
         <i class="ti ti-heart" aria-hidden="true"></i> Donate $<span id="donateAmt">5</span>
       </button>
     </div>
@@ -220,144 +250,489 @@
 </div>
 
 <script>
-const allData = {
-  money: {
-    label: 'Money', color: '#c9a84c',
-    sub: 'Guides, videos, and downloads to take control of your finances',
-    filters: ['all','budgeting','saving','banking','credit','debt','investing','taxes','housing'],
-    resources: [
-      { title:"Your first budget in 30 minutes", desc:"A step-by-step worksheet to plan income vs. expenses, even on a tight income.", type:"pdf", category:"budgeting", link:"https://consumer.gov/system/files/consumer_gov/pdf/1041A_BudgetWorksheet-508.pdf" },
-      { title:"The 50/30/20 rule explained", desc:"Watch how to split your paycheck for needs, wants, and savings with real examples.", type:"video", category:"budgeting", link:"https://www.youtube.com/watch?v=b9iwISYBI-g" },
-      { title:"How to open a bank account with no fees", desc:"Understand free checking options, online banks, and what to watch out for.", type:"read", category:"banking", link:"https://www.fdic.gov/getbanked" },
-      { title:"Understanding your credit score", desc:"What it is, why it matters, and five things that affect it starting today.", type:"video", category:"credit", link:"https://www.youtube.com/watch?v=1w_SM2RXTWA" },
-      { title:"Getting out of debt: a starter plan", desc:"Compare the avalanche vs. snowball methods and find one that works for you.", type:"read", category:"debt", link:"https://www.fidelity.com/learning-center/personal-finance/avalanche-snowball-debt" },
-      { title:"Emergency fund basics", desc:"Why $1,000 can change your life and how to start saving it this month.", type:"read", category:"saving", link:"https://www.khanacademy.org/economics-finance-domain/core-finance/stock-and-bonds" },
-      { title:"Investing 101 — no jargon", desc:"Stocks, bonds, index funds — plain language explainer for total beginners.", type:"video", category:"investing", link:"https://www.khanacademy.org/economics-finance-domain/core-finance/stock-and-bonds" },
-      { title:"Free tax filing resources", desc:"VITA sites, IRS Free File, and other ways to file for free if you qualify.", type:"read", category:"taxes", link:"https://www.irs.gov/file-your-taxes-for-free" },
-      { title:"Renting vs. buying — what makes sense now", desc:"A simple guide to help you think through your housing options.", type:"read", category:"housing", link:"https://consumer.ftc.gov/articles/understanding-your-credit" },
-      { title:"Building credit from scratch", desc:"Secured cards, credit-builder loans, and becoming an authorized user explained.", type:"read", category:"credit", link:"https://www.cnbc.com/select/guide/credit-scores-for-beginners/" },
-      { title:"How savings accounts really work", desc:"APY, compound interest, and which type of account is best for short-term goals.", type:"read", category:"saving", link:"https://www.nerdwallet.com/finance/learn/budget-worksheet" },
-      { title:"Paycheck breakdown worksheet", desc:"Download this fillable PDF to understand exactly where your money goes.", type:"pdf", category:"budgeting", link:"https://www.ramseysolutions.com/budgeting/budget-template" },
-    ]
-  },
-  life: {
-    label: 'Life Skills', color: '#3b82f6',
-    sub: 'Everyday skills that make adult life easier — nobody is born knowing this stuff',
-    filters: ['all','grooming','clothing','home','social','driving','safety'],
-    resources: [
-      { title:"How to shave properly", desc:"Prep, technique, and aftercare — whether you use a razor or electric shaver.", type:"video", category:"grooming", link:"https://www.youtube.com/watch?v=8GIhpZCBFoI" },
-      { title:"How to apply cologne correctly", desc:"Where to spray, how much, and how to make the scent last all day.", type:"video", category:"grooming", link:"https://www.youtube.com/watch?v=z1qLsXYv8Kk" },
-      { title:"How to tie a tie (5 ways)", desc:"From the classic four-in-hand to the Windsor knot — step by step.", type:"video", category:"clothing", link:"https://www.youtube.com/watch?v=XMoFdl_5Fhk" },
-      { title:"How to tie your shoelaces — properly", desc:"The Ian knot, the bunny ears, and why your laces keep coming undone.", type:"video", category:"clothing", link:"https://www.youtube.com/watch?v=obRSjFCrlsE" },
-      { title:"How to do laundry", desc:"Temperature settings, separating colors, and reading care labels explained.", type:"video", category:"home", link:"https://www.youtube.com/watch?v=4p_CENKjJAY" },
-      { title:"How to iron a shirt", desc:"Collar, cuffs, and body — get it wrinkle-free in under 5 minutes.", type:"video", category:"clothing", link:"https://www.youtube.com/watch?v=KNhk7vKlLgQ" },
-      { title:"Basic home repairs everyone should know", desc:"Fixing a leaky faucet, a running toilet, and patching a wall hole.", type:"video", category:"home", link:"https://www.youtube.com/results?search_query=basic+home+repairs+beginners" },
-      { title:"How to write a formal letter or email", desc:"Structure, tone, and phrases to use for jobs, landlords, and official matters.", type:"read", category:"social", link:"https://www.grammarly.com/blog/formal-email/" },
-      { title:"Table etiquette basics", desc:"Which fork, how to sit, and how to handle a formal or business meal.", type:"read", category:"social", link:"https://www.emilypost.com/advice/table-manners-top-ten" },
-      { title:"How to parallel park", desc:"A step-by-step visual guide to nailing parallel parking every time.", type:"video", category:"driving", link:"https://www.youtube.com/watch?v=6cECougP-OE" },
-      { title:"What to do in an emergency", desc:"Basic first aid, calling for help, and staying calm under pressure.", type:"read", category:"safety", link:"https://www.redcross.org/take-a-class/first-aid/performing-first-aid/first-aid-steps" },
-      { title:"How to unclog a drain", desc:"The right tools and technique for toilets, sinks, and showers.", type:"video", category:"home", link:"https://www.youtube.com/results?search_query=how+to+unclog+drain+plunge" },
-    ]
-  },
-  health: {
-    label: 'Health', color: '#22c55e',
-    sub: 'Know your body, understand your options, and take care of yourself',
-    filters: ['all','basics','mental health','doctors','fitness','nutrition'],
-    resources: [
-      { title:"How to read a prescription label", desc:"Dosage, refills, and warnings — what every abbreviation means.", type:"read", category:"basics", link:"https://www.fda.gov/drugs/over-counter-otc-nonprescription-drugs/understanding-over-counter-medicines" },
-      { title:"What to do when you can't afford a doctor", desc:"Free clinics, community health centers, and sliding-scale care near you.", type:"read", category:"doctors", link:"https://findahealthcenter.hrsa.gov/" },
-      { title:"Understanding mental health: a beginner's guide", desc:"Anxiety, depression, and stress — what they are and when to get help.", type:"video", category:"mental health", link:"https://www.youtube.com/watch?v=rkZl2gsLUp4" },
-      { title:"How to exercise with no equipment", desc:"A full-body beginner workout you can do anywhere, no gym needed.", type:"video", category:"fitness", link:"https://www.youtube.com/watch?v=OPLTMcS6wHM" },
-      { title:"How to read a nutrition label", desc:"Serving sizes, daily values, and what to actually look for on the label.", type:"read", category:"nutrition", link:"https://www.fda.gov/food/new-nutrition-facts-label/how-understand-and-use-nutrition-facts-label" },
-      { title:"How to find free or low-cost mental health help", desc:"Hotlines, free therapy apps, sliding-scale counselors, and online resources.", type:"read", category:"mental health", link:"https://www.nami.org/Support-Education/NAMI-HelpLine" },
-      { title:"Basic first aid everyone should know", desc:"CPR, choking, burns, cuts — what to do before the ambulance arrives.", type:"video", category:"basics", link:"https://www.redcross.org/take-a-class/first-aid" },
-      { title:"How to get health insurance for free or cheap", desc:"Medicaid, CHIP, ACA marketplace, and what you actually qualify for.", type:"read", category:"doctors", link:"https://www.healthcare.gov/lower-costs/" },
-    ]
-  },
-  work: {
-    label: 'Work', color: '#a855f7',
-    sub: 'Get the job, keep the job, and grow — no connections required',
-    filters: ['all','resume','interviews','workplace','rights','career'],
-    resources: [
-      { title:"How to write a resume from scratch", desc:"Format, what to include, and how to stand out even with no experience.", type:"read", category:"resume", link:"https://www.indeed.com/career-advice/resumes-cover-letters/how-to-make-a-resume" },
-      { title:"How to write a cover letter", desc:"What to say, how long it should be, and a free template to follow.", type:"read", category:"resume", link:"https://www.indeed.com/career-advice/resumes-cover-letters/how-to-write-a-cover-letter" },
-      { title:"Common interview questions answered", desc:"Tell me about yourself, what's your weakness — and how to nail them.", type:"video", category:"interviews", link:"https://www.youtube.com/watch?v=HG68Ymazo18" },
-      { title:"What to wear to a job interview", desc:"Business casual vs. formal — how to dress for any kind of workplace.", type:"read", category:"interviews", link:"https://www.indeed.com/career-advice/interviewing/what-to-wear-to-an-interview" },
-      { title:"How to negotiate your salary", desc:"What to say, when to say it, and how to get what you deserve.", type:"video", category:"workplace", link:"https://www.youtube.com/watch?v=XY5SeCl_8NE" },
-      { title:"Your workplace rights explained", desc:"Minimum wage, breaks, discrimination, and what your employer can't do.", type:"read", category:"rights", link:"https://www.dol.gov/general/topic/youthlabor/employmentstandards" },
-      { title:"How to ask for a raise", desc:"Timing, wording, and how to make the case without feeling awkward.", type:"read", category:"workplace", link:"https://www.indeed.com/career-advice/pay-salary/how-to-ask-for-a-raise" },
-      { title:"Free resume builder tools", desc:"The best free tools to create a professional-looking resume in minutes.", type:"read", category:"resume", link:"https://www.canva.com/resumes/templates/" },
-    ]
-  },
-  food: {
-    label: 'Food', color: '#f97316',
-    sub: 'Eat well on a small budget — cooking is a superpower anyone can learn',
-    filters: ['all','basics','budget','meal prep','nutrition'],
-    resources: [
-      { title:"10 meals you can make for under $2", desc:"Cheap, filling, and actually delicious — with step-by-step instructions.", type:"video", category:"budget", link:"https://www.youtube.com/watch?v=hBbQBkFQbKY" },
-      { title:"How to meal prep for the week", desc:"Cook once, eat all week — a beginner's guide to meal prepping.", type:"video", category:"meal prep", link:"https://www.youtube.com/watch?v=R4A4pFgxoGI" },
-      { title:"Knife skills for beginners", desc:"How to hold a knife, chop safely, and cut every vegetable correctly.", type:"video", category:"basics", link:"https://www.youtube.com/watch?v=JMA2SqaDgG8" },
-      { title:"How to read a nutrition label", desc:"Understand what's in your food and how to make better choices.", type:"read", category:"nutrition", link:"https://www.fda.gov/food/new-nutrition-facts-label/how-understand-and-use-nutrition-facts-label" },
-      { title:"Grocery shopping on a tight budget", desc:"What to buy, what to skip, and how to stretch $30 for a whole week.", type:"read", category:"budget", link:"https://www.eatingwell.com/article/7964498/how-to-grocery-shop-on-a-budget/" },
-      { title:"5 basic cooking techniques", desc:"Sauté, boil, roast, steam, fry — master these and you can make almost anything.", type:"video", category:"basics", link:"https://www.youtube.com/watch?v=Fqy1V5vN5S4" },
-      { title:"How to store food safely", desc:"What goes in the fridge, what doesn't, and how to avoid food poisoning.", type:"read", category:"basics", link:"https://www.foodsafety.gov/keep-food-safe/foodkeeper-app" },
-      { title:"Free food assistance programs", desc:"SNAP, food banks, and WIC — how to apply and what you can get.", type:"read", category:"budget", link:"https://www.benefits.gov/benefit/361" },
-    ]
-  },
-  tech: {
-    label: 'Tech', color: '#06b6d4',
-    sub: 'Stay safe, save time, and get the most out of the technology around you',
-    filters: ['all','safety','basics','internet','phone','tools'],
-    resources: [
-      { title:"How to spot a scam email or text", desc:"Phishing, fake links, and the red flags that give scammers away.", type:"read", category:"safety", link:"https://consumer.ftc.gov/articles/how-recognize-and-report-spam-text-messages" },
-      { title:"How to create a strong password", desc:"What makes a password secure and how to manage them without forgetting.", type:"read", category:"safety", link:"https://www.consumer.ftc.gov/articles/creating-stronger-passwords" },
-      { title:"Basic computer skills for beginners", desc:"Files, folders, copy-paste, screenshots — the essentials you need to know.", type:"video", category:"basics", link:"https://www.youtube.com/watch?v=aN7FG2bPVlw" },
-      { title:"How to use Google effectively", desc:"Search tips, shortcuts, and tricks to find anything in seconds.", type:"read", category:"internet", link:"https://support.google.com/websearch/answer/2466433" },
-      { title:"How to protect your privacy online", desc:"Browser settings, VPNs, and what companies actually know about you.", type:"read", category:"safety", link:"https://ssd.eff.org/en/module-categories/security-scenarios" },
-      { title:"Free tools everyone should know about", desc:"Google Docs, Canva, and other free tools that replace expensive software.", type:"read", category:"tools", link:"https://zapier.com/blog/best-free-productivity-apps/" },
-      { title:"How to back up your phone", desc:"Never lose your photos or contacts again — iPhone and Android covered.", type:"video", category:"phone", link:"https://www.youtube.com/results?search_query=how+to+back+up+phone+android+iphone" },
-      { title:"How to stay safe on public WiFi", desc:"What hackers can see on open networks and how to protect yourself.", type:"read", category:"safety", link:"https://consumer.ftc.gov/articles/are-public-wi-fi-networks-safe-what-you-need-know" },
-    ]
+// Language switcher
+let activeLang = 'en';
+const langNotices = {
+  es: 'Algunos enlaces pueden estar en inglés cuando no hay versión traducida disponible.',
+  fr: "Certains liens peuvent être en anglais lorsqu'une version traduite n'est pas disponible.",
+  pt: 'Alguns links podem estar em inglês quando não há versão traduzida disponível.'
+};
+
+function setLang(lang, el) {
+  activeLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('statLang').textContent = lang.toUpperCase();
+  const notice = document.getElementById('langNotice');
+  const noticeText = document.getElementById('langNoticeText');
+  if (lang !== 'en') {
+    notice.style.display = 'block';
+    noticeText.textContent = langNotices[lang];
+  } else {
+    notice.style.display = 'none';
   }
+  renderCurrentCategory();
+}
+
+function getCategoryData(cat) {
+  const langOverrides = allData[activeLang];
+  if (langOverrides && langOverrides[cat]) return langOverrides[cat];
+  return allData['en'][cat];
+}
+
+
+const allData = {
+  en: {
+    money: {
+      label: 'Money', color: '#c9a84c',
+      sub: 'Guides, videos, and downloads to take control of your finances',
+      filters: ['all','budgeting','saving','banking','credit','debt','investing','taxes','housing'],
+      resources: [
+        { title:"Your first budget in 30 minutes", desc:"A step-by-step worksheet to plan income vs. expenses, even on a tight income.", type:"pdf", category:"budgeting", link:"https://consumer.gov/system/files/consumer_gov/pdf/1041A_BudgetWorksheet-508.pdf" },
+        { title:"The 50/30/20 rule explained", desc:"Watch how to split your paycheck for needs, wants, and savings with real examples.", type:"video", category:"budgeting", link:"https://www.youtube.com/watch?v=b9iwISYBI-g" },
+        { title:"How to open a bank account with no fees", desc:"Understand free checking options, online banks, and what to watch out for.", type:"read", category:"banking", link:"https://www.fdic.gov/getbanked" },
+        { title:"Understanding your credit score", desc:"What it is, why it matters, and five things that affect it starting today.", type:"video", category:"credit", link:"https://www.youtube.com/watch?v=1w_SM2RXTWA" },
+        { title:"Getting out of debt: a starter plan", desc:"Compare the avalanche vs. snowball methods and find one that works for you.", type:"read", category:"debt", link:"https://www.youtube.com/results?search_query=avalanche+vs+snowball+debt+method" },
+        { title:"Emergency fund basics", desc:"Why $1,000 can change your life and how to start saving it this month.", type:"read", category:"saving", link:"https://www.khanacademy.org/college-careers-more/personal-finance" },
+        { title:"Investing 101 — no jargon", desc:"Stocks, bonds, index funds — plain language explainer for total beginners.", type:"video", category:"investing", link:"https://www.khanacademy.org/college-careers-more/personal-finance" },
+        { title:"Free tax filing resources", desc:"VITA sites, IRS Free File, and other ways to file for free if you qualify.", type:"read", category:"taxes", link:"https://www.irs.gov/file-your-taxes-for-free" },
+        { title:"Renting vs. buying — what makes sense now", desc:"A simple guide to help you think through your housing options.", type:"read", category:"housing", link:"https://www.youtube.com/results?search_query=renting+vs+buying+home+explained" },
+        { title:"Building credit from scratch", desc:"Secured cards, credit-builder loans, and becoming an authorized user explained.", type:"read", category:"credit", link:"https://www.youtube.com/results?search_query=credit+score+explained+beginners" },
+        { title:"How savings accounts really work", desc:"APY, compound interest, and which type of account is best for short-term goals.", type:"read", category:"saving", link:"https://www.youtube.com/results?search_query=how+savings+accounts+work+APY+explained" },
+        { title:"Paycheck breakdown worksheet", desc:"Download this fillable PDF to understand exactly where your money goes.", type:"pdf", category:"budgeting", link:"https://www.youtube.com/results?search_query=paycheck+budget+worksheet+template" },
+      ]
+    },
+    life: {
+      label: 'Life Skills', color: '#3b82f6',
+      sub: 'Everyday skills that make adult life easier — for everyone',
+      filters: ['all','clothing','home','social','driving','safety'],
+      resources: [
+        { title:"How to tie a tie (5 ways)", desc:"From the classic four-in-hand to the Windsor knot — step by step.", type:"video", category:"clothing", link:"https://www.youtube.com/watch?v=XMoFdl_5Fhk" },
+        { title:"How to tie your shoelaces — properly", desc:"The Ian knot, the bunny ears, and why your laces keep coming undone.", type:"video", category:"clothing", link:"https://www.youtube.com/watch?v=obRSjFCrlsE" },
+        { title:"How to do laundry", desc:"Temperature settings, separating colors, and reading care labels explained.", type:"video", category:"home", link:"https://www.youtube.com/watch?v=4p_CENKjJAY" },
+        { title:"How to iron a shirt", desc:"Collar, cuffs, and body — get it wrinkle-free in under 5 minutes.", type:"video", category:"clothing", link:"https://www.youtube.com/watch?v=KNhk7vKlLgQ" },
+        { title:"Basic home repairs everyone should know", desc:"Fixing a leaky faucet, a running toilet, and patching a wall hole.", type:"video", category:"home", link:"https://www.youtube.com/results?search_query=basic+home+repairs+beginners" },
+        { title:"How to write a formal letter or email", desc:"Structure, tone, and phrases to use for jobs, landlords, and official matters.", type:"read", category:"social", link:"https://www.youtube.com/results?search_query=how+to+write+formal+email" },
+        { title:"Table etiquette basics", desc:"Which fork, how to sit, and how to handle a formal or business meal.", type:"read", category:"social", link:"https://www.youtube.com/results?search_query=table+etiquette+manners+basics" },
+        { title:"How to parallel park", desc:"A step-by-step visual guide to nailing parallel parking every time.", type:"video", category:"driving", link:"https://www.youtube.com/watch?v=6cECougP-OE" },
+        { title:"What to do in an emergency", desc:"Basic first aid, calling for help, and staying calm under pressure.", type:"read", category:"safety", link:"https://www.redcross.org/take-a-class/first-aid/performing-first-aid/first-aid-steps" },
+        { title:"How to unclog a drain", desc:"The right tools and technique for toilets, sinks, and showers.", type:"video", category:"home", link:"https://www.youtube.com/results?search_query=how+to+unclog+drain+plunge" },
+        { title:"How to negotiate anything", desc:"Techniques behind salary talks, rent, and everyday bargaining.", type:"read", category:"social", link:"https://www.youtube.com/results?search_query=how+to+negotiate+tips+beginners" },
+        { title:"Apartment checklist before you sign", desc:"What to look for, what to ask, and what red flags to avoid.", type:"read", category:"home", link:"https://www.youtube.com/results?search_query=apartment+checklist+before+signing+lease" },
+      ]
+    },
+    women: {
+      label: 'Women', color: '#ec4899',
+      sub: 'Health, rights, finances, and life skills that matter for women',
+      filters: ['all','health','finance','safety','career','self-care','rights'],
+      resources: [
+        { title:"Understanding your menstrual cycle", desc:"What is normal, what is not, and how to track it for your overall health.", type:"read", category:"health", link:"https://www.youtube.com/results?search_query=understanding+menstrual+cycle+health" },
+        { title:"Breast self-exam — how and when", desc:"A simple monthly routine that could be one of the most important things you do.", type:"read", category:"health", link:"https://www.youtube.com/results?search_query=breast+self+exam+how+to" },
+        { title:"The gender pay gap — and how to fight it", desc:"Know your worth, negotiate confidently, and understand your legal rights.", type:"read", category:"finance", link:"https://www.youtube.com/results?search_query=gender+pay+gap+how+to+negotiate+salary" },
+        { title:"Women and investing: getting started", desc:"Why women often invest less — and how to close the gap starting today.", type:"video", category:"finance", link:"https://www.youtube.com/watch?v=fJxNHVfMsDg" },
+        { title:"Personal safety basics every woman should know", desc:"Situational awareness, de-escalation, and when to trust your instincts.", type:"read", category:"safety", link:"https://www.thehotline.org/resources/safety-planning/" },
+        { title:"Your rights in the workplace as a woman", desc:"Discrimination, maternity leave, harassment — what the law protects.", type:"read", category:"rights", link:"https://www.eeoc.gov/laws/guidance/pregnancy-discrimination" },
+        { title:"How to build a skin care routine (any budget)", desc:"Cleanser, moisturizer, SPF — building a simple routine from scratch.", type:"video", category:"self-care", link:"https://www.youtube.com/watch?v=OrElyY7MFVs" },
+        { title:"Pelvic floor health explained", desc:"Why it matters, signs of dysfunction, and exercises that help.", type:"read", category:"health", link:"https://www.womenshealth.gov/a-z-topics/pelvic-floor-disorders" },
+        { title:"Building an emergency fund as a single woman", desc:"Practical steps for building financial independence on any income.", type:"read", category:"finance", link:"https://www.youtube.com/results?search_query=emergency+fund+women+financial+independence" },
+        { title:"Understanding cervical screening (Pap smear)", desc:"What it checks, how often you need it, and what to expect.", type:"read", category:"health", link:"https://www.youtube.com/results?search_query=pap+smear+cervical+screening+explained" },
+        { title:"Negotiating salary as a woman", desc:"Research-backed strategies to close the gap and advocate for yourself.", type:"video", category:"career", link:"https://www.youtube.com/watch?v=J8JYoqEiHcQ" },
+        { title:"Free resources for women escaping abuse", desc:"Hotlines, shelters, legal aid, and how to make a safety plan.", type:"read", category:"safety", link:"https://www.thehotline.org/" },
+      ]
+    },
+    men: {
+      label: 'Men', color: '#0ea5e9',
+      sub: 'Health, grooming, emotions, and life skills built for men',
+      filters: ['all','health','grooming','mental health','finance','relationships'],
+      resources: [
+        { title:"How to shave properly", desc:"Prep, technique, and aftercare — whether you use a razor or electric shaver.", type:"video", category:"grooming", link:"https://www.youtube.com/watch?v=8GIhpZCBFoI" },
+        { title:"How to apply cologne correctly", desc:"Where to spray, how much, and how to make the scent last all day.", type:"video", category:"grooming", link:"https://www.youtube.com/watch?v=z1qLsXYv8Kk" },
+        { title:"Men's mental health: why it's hard to ask for help", desc:"Understanding the stigma, what therapy actually looks like, and how to start.", type:"read", category:"mental health", link:"https://www.nimh.nih.gov/health/topics/men-and-mental-health" },
+        { title:"Testicular self-exam — how and when", desc:"A quick monthly check that can catch issues early.", type:"read", category:"health", link:"https://www.youtube.com/results?search_query=testicular+self+exam+how+to" },
+        { title:"Men and depression: what it really looks like", desc:"How depression often shows up differently in men — and where to get help.", type:"video", category:"mental health", link:"https://www.youtube.com/watch?v=yCzuL9WvkYU" },
+        { title:"How to build muscle — beginner's guide", desc:"The basics of progressive overload, recovery, and eating to support it.", type:"video", category:"health", link:"https://www.youtube.com/watch?v=R6A0vULUFUk" },
+        { title:"Prostate health explained", desc:"When to start screening, what the tests involve, and risk factors to know.", type:"read", category:"health", link:"https://www.youtube.com/results?search_query=prostate+health+screening+explained" },
+        { title:"How to build healthy friendships as an adult man", desc:"Why male friendships decline after 30, and how to actively rebuild them.", type:"read", category:"relationships", link:"https://www.youtube.com/results?search_query=como+hacer+amigos+hombres+adultos" },
+        { title:"Men's skin care basics", desc:"Face wash, moisturizer, and SPF — a simple no-fuss routine.", type:"video", category:"grooming", link:"https://www.youtube.com/watch?v=kzGJXRhEBqk" },
+        { title:"Financial independence for men: common blind spots", desc:"Insurance, wills, retirement — things men statistically delay.", type:"read", category:"finance", link:"https://www.youtube.com/results?search_query=financial+planning+tips+men+insurance+retirement" },
+        { title:"How to talk about feelings (for guys who struggle)", desc:"Practical language tools for expressing emotion without shutting down.", type:"read", category:"relationships", link:"https://www.youtube.com/results?search_query=hombres+hablar+sobre+emociones+sentimientos" },
+        { title:"Hair loss: what your options actually are", desc:"From lifestyle changes to treatments — a no-hype honest breakdown.", type:"read", category:"grooming", link:"https://www.youtube.com/results?search_query=perdida+cabello+tratamientos+opciones" },
+      ]
+    },
+    parenting: {
+      label: 'Parenting', color: '#f59e0b',
+      sub: 'No one is born knowing how to be a parent — the basics, for free',
+      filters: ['all','newborn','baby','child','teens','money','wellbeing'],
+      resources: [
+        { title:"Your baby's first week home", desc:"Sleep, feeding, cord care, and what is normal vs. when to call the doctor.", type:"read", category:"newborn", link:"https://www.youtube.com/results?search_query=newborn+baby+first+week+home+basics" },
+        { title:"How to swaddle a newborn", desc:"Step-by-step technique that helps babies sleep safer and longer.", type:"video", category:"newborn", link:"https://www.youtube.com/watch?v=dFRHDT-lw5w" },
+        { title:"Safe sleep for babies (SIDS prevention)", desc:"Back to sleep, firm mattress, no loose items — the rules that save lives.", type:"read", category:"newborn", link:"https://www.nichd.nih.gov/sts/about/risk" },
+        { title:"How to handle toddler tantrums", desc:"What is happening in their brain and how to respond without losing your mind.", type:"video", category:"baby", link:"https://www.youtube.com/watch?v=7N2JcfpjIFg" },
+        { title:"Introducing solid foods: a beginner's guide", desc:"When to start, what to try first, and foods to avoid in year one.", type:"read", category:"baby", link:"https://www.youtube.com/results?search_query=introducing+solid+foods+baby+guide" },
+        { title:"Talking to kids about big emotions", desc:"Age-appropriate language to help children name and process feelings.", type:"read", category:"child", link:"https://www.youtube.com/results?search_query=hablar+ninos+sobre+emociones+sentimientos" },
+        { title:"Raising a reader: literacy from birth", desc:"How to build language and reading skills from day one — free activities.", type:"read", category:"child", link:"https://www.youtube.com/results?search_query=raising+a+reader+literacy+from+birth" },
+        { title:"Talking to teenagers without shutting them down", desc:"Communication strategies that keep the lines open during the hard years.", type:"read", category:"teens", link:"https://www.youtube.com/results?search_query=como+hablar+con+adolescentes+consejos" },
+        { title:"Teen mental health: warning signs and what to do", desc:"What to watch for, how to start the conversation, and where to get help.", type:"read", category:"teens", link:"https://www.youtube.com/results?search_query=teen+mental+health+warning+signs+parents" },
+        { title:"Budgeting for a baby: what it really costs", desc:"Honest breakdown of first-year costs — and how to cut them without cutting corners.", type:"read", category:"money", link:"https://www.youtube.com/results?search_query=cuanto+cuesta+tener+un+bebe+presupuesto" },
+        { title:"Free and low-cost resources for parents", desc:"WIC, SNAP, Early Head Start, Medicaid — what you qualify for and how to apply.", type:"read", category:"money", link:"https://www.benefits.gov/categories/Families%20and%20Children" },
+        { title:"Parental burnout: it's real and it's common", desc:"Signs you are burning out, why parents do not talk about it, and how to cope.", type:"read", category:"wellbeing", link:"https://www.youtube.com/results?search_query=agotamiento+parental+burnout+como+manejar" },
+        { title:"How to raise confident kids", desc:"Research-backed habits that build resilience, self-esteem, and independence.", type:"read", category:"child", link:"https://www.youtube.com/results?search_query=how+to+raise+confident+kids+self+esteem" },
+      ]
+    },
+    health: {
+      label: 'Health', color: '#22c55e',
+      sub: 'Know your body, understand your options, and take care of yourself',
+      filters: ['all','basics','mental health','doctors','fitness','nutrition'],
+      resources: [
+        { title:"How to read a prescription label", desc:"Dosage, refills, and warnings — what every abbreviation means.", type:"read", category:"basics", link:"https://www.fda.gov/drugs/over-counter-otc-nonprescription-drugs/understanding-over-counter-medicines" },
+        { title:"What to do when you cannot afford a doctor", desc:"Free clinics, community health centers, and sliding-scale care near you.", type:"read", category:"doctors", link:"https://findahealthcenter.hrsa.gov/" },
+        { title:"Understanding mental health: a beginner's guide", desc:"Anxiety, depression, and stress — what they are and when to get help.", type:"video", category:"mental health", link:"https://www.youtube.com/watch?v=rkZl2gsLUp4" },
+        { title:"How to exercise with no equipment", desc:"A full-body beginner workout you can do anywhere, no gym needed.", type:"video", category:"fitness", link:"https://www.youtube.com/watch?v=OPLTMcS6wHM" },
+        { title:"How to read a nutrition label", desc:"Serving sizes, daily values, and what to actually look for on the label.", type:"read", category:"nutrition", link:"https://www.fda.gov/food/new-nutrition-facts-label/how-understand-and-use-nutrition-facts-label" },
+        { title:"How to find free or low-cost mental health help", desc:"Hotlines, free therapy apps, sliding-scale counselors, and online resources.", type:"read", category:"mental health", link:"https://www.nami.org/help" },
+        { title:"Basic first aid everyone should know", desc:"CPR, choking, burns, cuts — what to do before the ambulance arrives.", type:"video", category:"basics", link:"https://www.redcross.org/take-a-class/first-aid" },
+        { title:"How to get health insurance for free or cheap", desc:"Medicaid, CHIP, ACA marketplace, and what you actually qualify for.", type:"read", category:"doctors", link:"https://www.healthcare.gov/lower-costs/" },
+      ]
+    },
+    work: {
+      label: 'Work', color: '#a855f7',
+      sub: 'Get the job, keep the job, and grow — no connections required',
+      filters: ['all','resume','interviews','workplace','rights','career'],
+      resources: [
+        { title:"How to write a resume from scratch", desc:"Format, what to include, and how to stand out even with no experience.", type:"read", category:"resume", link:"https://www.youtube.com/results?search_query=how+to+write+a+resume+from+scratch" },
+        { title:"How to write a cover letter", desc:"What to say, how long it should be, and a free template to follow.", type:"read", category:"resume", link:"https://www.youtube.com/results?search_query=how+to+write+a+cover+letter+examples" },
+        { title:"Common interview questions answered", desc:"Tell me about yourself, what is your weakness — and how to nail them.", type:"video", category:"interviews", link:"https://www.youtube.com/watch?v=HG68Ymazo18" },
+        { title:"What to wear to a job interview", desc:"Business casual vs. formal — how to dress for any kind of workplace.", type:"read", category:"interviews", link:"https://www.youtube.com/results?search_query=what+to+wear+to+job+interview" },
+        { title:"How to negotiate your salary", desc:"What to say, when to say it, and how to get what you deserve.", type:"video", category:"workplace", link:"https://www.youtube.com/watch?v=XY5SeCl_8NE" },
+        { title:"Your workplace rights explained", desc:"Minimum wage, breaks, discrimination, and what your employer cannot do.", type:"read", category:"rights", link:"https://www.dol.gov/general/topic/youthlabor/employmentstandards" },
+        { title:"How to ask for a raise", desc:"Timing, wording, and how to make the case without feeling awkward.", type:"read", category:"workplace", link:"https://www.youtube.com/results?search_query=how+to+ask+for+a+raise+tips" },
+        { title:"Free resume builder tools", desc:"The best free tools to create a professional-looking resume in minutes.", type:"read", category:"resume", link:"https://www.canva.com/resumes/" },
+      ]
+    },
+    food: {
+      label: 'Food', color: '#f97316',
+      sub: 'Eat well on a small budget — cooking is a superpower anyone can learn',
+      filters: ['all','basics','budget','meal prep','nutrition'],
+      resources: [
+        { title:"10 meals you can make for under $2", desc:"Cheap, filling, and actually delicious — with step-by-step instructions.", type:"video", category:"budget", link:"https://www.youtube.com/watch?v=hBbQBkFQbKY" },
+        { title:"How to meal prep for the week", desc:"Cook once, eat all week — a beginner's guide to meal prepping.", type:"video", category:"meal prep", link:"https://www.youtube.com/watch?v=R4A4pFgxoGI" },
+        { title:"Knife skills for beginners", desc:"How to hold a knife, chop safely, and cut every vegetable correctly.", type:"video", category:"basics", link:"https://www.youtube.com/watch?v=JMA2SqaDgG8" },
+        { title:"How to read a nutrition label", desc:"Understand what is in your food and how to make better choices.", type:"read", category:"nutrition", link:"https://www.fda.gov/food/new-nutrition-facts-label/how-understand-and-use-nutrition-facts-label" },
+        { title:"Grocery shopping on a tight budget", desc:"What to buy, what to skip, and how to stretch $30 for a whole week.", type:"read", category:"budget", link:"https://www.youtube.com/results?search_query=compras+supermercado+presupuesto+tips" },
+        { title:"5 basic cooking techniques", desc:"Saute, boil, roast, steam, fry — master these and you can make almost anything.", type:"video", category:"basics", link:"https://www.youtube.com/watch?v=Fqy1V5vN5S4" },
+        { title:"How to store food safely", desc:"What goes in the fridge, what does not, and how to avoid food poisoning.", type:"read", category:"basics", link:"https://www.foodsafety.gov/keep-food-safe/foodkeeper-app" },
+        { title:"Free food assistance programs", desc:"SNAP, food banks, and WIC — how to apply and what you can get.", type:"read", category:"budget", link:"https://www.benefits.gov/benefit/361" },
+      ]
+    },
+    tech: {
+      label: 'Tech', color: '#06b6d4',
+      sub: 'Stay safe, save time, and get the most out of the technology around you',
+      filters: ['all','safety','basics','internet','phone','tools'],
+      resources: [
+        { title:"How to spot a scam email or text", desc:"Phishing, fake links, and the red flags that give scammers away.", type:"read", category:"safety", link:"https://consumer.ftc.gov/articles/how-recognize-and-report-spam-text-messages" },
+        { title:"How to create a strong password", desc:"What makes a password secure and how to manage them without forgetting.", type:"read", category:"safety", link:"https://www.consumer.ftc.gov/articles/creating-stronger-passwords" },
+        { title:"Basic computer skills for beginners", desc:"Files, folders, copy-paste, screenshots — the essentials you need to know.", type:"video", category:"basics", link:"https://www.youtube.com/watch?v=aN7FG2bPVlw" },
+        { title:"How to use Google effectively", desc:"Search tips, shortcuts, and tricks to find anything in seconds.", type:"read", category:"internet", link:"https://www.youtube.com/results?search_query=how+to+use+google+search+effectively+tips" },
+        { title:"How to protect your privacy online", desc:"Browser settings, VPNs, and what companies actually know about you.", type:"read", category:"safety", link:"https://www.youtube.com/results?search_query=how+to+protect+privacy+online+beginners" },
+        { title:"Free tools everyone should know about", desc:"Google Docs, Canva, and other free tools that replace expensive software.", type:"read", category:"tools", link:"https://www.youtube.com/results?search_query=best+free+tools+productivity+apps+2024" },
+        { title:"How to back up your phone", desc:"Never lose your photos or contacts again — iPhone and Android covered.", type:"video", category:"phone", link:"https://www.youtube.com/results?search_query=how+to+back+up+phone+android+iphone" },
+        { title:"How to stay safe on public WiFi", desc:"What hackers can see on open networks and how to protect yourself.", type:"read", category:"safety", link:"https://consumer.ftc.gov/articles/are-public-wi-fi-networks-safe-what-you-need-know" },
+      ]
+    },
+
+
+    mental: {
+      label: 'Mental Health', color: '#8b5cf6',
+      sub: 'Your mind matters — practical tools and knowledge for everyday wellbeing',
+      filters: ['all','anxiety','depression','stress','therapy','crisis','self-help'],
+      resources: [
+        { title:"What anxiety actually feels like — and what helps", desc:"Physical symptoms, thought patterns, and evidence-based ways to manage it.", type:"video", category:"anxiety", link:"https://www.youtube.com/results?search_query=what+is+anxiety+symptoms+how+to+manage" },
+        { title:"Depression vs. sadness: what's the difference", desc:"How to tell if what you're feeling is more than just a bad week.", type:"video", category:"depression", link:"https://www.youtube.com/results?search_query=depression+vs+sadness+difference+explained" },
+        { title:"Free therapy options when you can't afford to pay", desc:"Open Path, BetterHelp sliding scale, NAMI, and crisis lines — all free or low cost.", type:"read", category:"therapy", link:"https://www.nami.org/help" },
+        { title:"How to find a therapist that actually fits you", desc:"Types of therapy, what to ask in a first session, and red flags to watch for.", type:"video", category:"therapy", link:"https://www.youtube.com/results?search_query=how+to+find+a+therapist+tips+beginners" },
+        { title:"Breathing exercises that actually calm anxiety", desc:"Box breathing, 4-7-8, and physiological sigh — how and when to use each.", type:"video", category:"anxiety", link:"https://www.youtube.com/results?search_query=breathing+exercises+for+anxiety+calm" },
+        { title:"How stress affects your body over time", desc:"Cortisol, sleep, digestion, heart — what chronic stress does physically.", type:"video", category:"stress", link:"https://www.youtube.com/results?search_query=how+stress+affects+the+body+long+term" },
+        { title:"How to sleep better when your mind won't stop", desc:"Sleep hygiene, CBT-I techniques, and what actually works according to research.", type:"video", category:"stress", link:"https://www.youtube.com/results?search_query=how+to+sleep+better+anxious+mind+tips" },
+        { title:"What to do in a mental health crisis", desc:"When to call a hotline, go to urgent care, or reach out — and what to say.", type:"read", category:"crisis", link:"https://988lifeline.org/" },
+        { title:"Journaling for mental health: how to actually start", desc:"Prompts, formats, and evidence behind why writing helps your brain.", type:"video", category:"self-help", link:"https://www.youtube.com/results?search_query=journaling+for+mental+health+how+to+start" },
+        { title:"Understanding trauma and how it shows up", desc:"What trauma is, how it affects behavior, and paths toward healing.", type:"video", category:"self-help", link:"https://www.youtube.com/results?search_query=understanding+trauma+effects+healing+explained" },
+        { title:"How to support someone with depression", desc:"What to say, what not to say, and how to help without burning yourself out.", type:"read", category:"depression", link:"https://www.youtube.com/results?search_query=how+to+help+someone+with+depression+tips" },
+        { title:"The science of habits and how to change them", desc:"How habit loops work and the most effective methods to build or break them.", type:"video", category:"self-help", link:"https://www.youtube.com/results?search_query=how+to+build+habits+science+tips" },
+      ]
+    },
+    legal: {
+      label: 'Legal Basics', color: '#64748b',
+      sub: 'Know your rights — a plain-language intro to the laws that affect your daily life',
+      filters: ['all','rights','contracts','housing','employment','family','immigration'],
+      resources: [
+        { title:"What to do if you're arrested", desc:"Your Miranda rights, when to stay silent, and why you should always ask for a lawyer.", type:"video", category:"rights", link:"https://www.youtube.com/results?search_query=what+to+do+if+arrested+rights+miranda" },
+        { title:"How to read a contract before you sign", desc:"Key clauses to find, red flags to watch for, and what you can negotiate.", type:"video", category:"contracts", link:"https://www.youtube.com/results?search_query=how+to+read+a+contract+before+signing" },
+        { title:"Tenant rights: what your landlord can and can't do", desc:"Repairs, entry, deposits, eviction — what the law actually says.", type:"read", category:"housing", link:"https://www.youtube.com/results?search_query=tenant+rights+landlord+laws+explained" },
+        { title:"Free and low-cost legal help", desc:"Legal aid societies, law school clinics, and online resources for when you can't afford a lawyer.", type:"read", category:"rights", link:"https://www.lawhelp.org/" },
+        { title:"What a small claims court is and how to use it", desc:"When to sue, how to file, and what to expect on the day — no lawyer needed.", type:"video", category:"rights", link:"https://www.youtube.com/results?search_query=small+claims+court+how+it+works+guide" },
+        { title:"Employment rights you probably didn't know you had", desc:"Rest breaks, wrongful termination, discrimination protections — the basics.", type:"read", category:"employment", link:"https://www.dol.gov/general/topic/discrimination" },
+        { title:"Understanding a lease agreement", desc:"Security deposits, subletting, notice periods — what every clause really means.", type:"video", category:"housing", link:"https://www.youtube.com/results?search_query=how+to+understand+lease+agreement+renting" },
+        { title:"How to write a simple will", desc:"Why everyone needs one, what it must include, and free tools to help.", type:"video", category:"family", link:"https://www.youtube.com/results?search_query=how+to+write+a+will+simple+guide" },
+        { title:"Power of attorney explained", desc:"What it is, when you need it, and how to set one up for a parent or yourself.", type:"video", category:"family", link:"https://www.youtube.com/results?search_query=power+of+attorney+explained+simply" },
+        { title:"What to do after a car accident", desc:"Steps to take on scene, what to say (and not say), and how to file a claim.", type:"read", category:"rights", link:"https://www.youtube.com/results?search_query=what+to+do+after+car+accident+steps" },
+        { title:"Understanding immigration basics", desc:"Visa types, green cards, citizenship — a plain-language overview of the U.S. system.", type:"video", category:"immigration", link:"https://www.youtube.com/results?search_query=immigration+basics+visa+green+card+explained" },
+        { title:"Consumer rights: when a company wrongs you", desc:"Chargebacks, refunds, complaint escalation, and the FTC complaint process.", type:"read", category:"rights", link:"https://consumer.ftc.gov/consumer-alerts" },
+      ]
+    },
+    relationships: {
+      label: 'Relationships', color: '#f43f5e',
+      sub: 'Communication, conflict, and connection — skills nobody officially teaches',
+      filters: ['all','communication','conflict','boundaries','dating','family','friendship'],
+      resources: [
+        { title:"How to have a hard conversation without it blowing up", desc:"Timing, framing, and the listening techniques that actually defuse tension.", type:"video", category:"communication", link:"https://www.youtube.com/results?search_query=how+to+have+difficult+conversations+tips" },
+        { title:"What healthy vs. unhealthy relationships look like", desc:"The signs of a supportive relationship — and the red flags that often go unnoticed.", type:"video", category:"communication", link:"https://www.youtube.com/results?search_query=healthy+vs+unhealthy+relationship+signs" },
+        { title:"How to set and hold boundaries", desc:"What boundaries are, how to express them calmly, and how to respond if they're crossed.", type:"video", category:"boundaries", link:"https://www.youtube.com/results?search_query=how+to+set+boundaries+relationships+tips" },
+        { title:"How to apologize properly", desc:"What makes an apology work — and what to avoid saying that makes it worse.", type:"video", category:"conflict", link:"https://www.youtube.com/results?search_query=how+to+apologize+properly+effectively" },
+        { title:"The 5 love languages explained", desc:"Understanding how you and others give and receive love — and why it matters.", type:"video", category:"dating", link:"https://www.youtube.com/results?search_query=5+love+languages+explained+simply" },
+        { title:"How to make and keep friends as an adult", desc:"Why adult friendship is hard and practical strategies to build real connections.", type:"video", category:"friendship", link:"https://www.youtube.com/results?search_query=how+to+make+friends+as+an+adult+tips" },
+        { title:"How to deal with a toxic family member", desc:"Setting limits, managing guilt, and protecting your energy without cutting everyone off.", type:"video", category:"family", link:"https://www.youtube.com/results?search_query=how+to+deal+with+toxic+family+member" },
+        { title:"Conflict resolution: how to argue without damaging the relationship", desc:"The techniques behind productive disagreement — de-escalation, timing, repair.", type:"video", category:"conflict", link:"https://www.youtube.com/results?search_query=conflict+resolution+skills+relationships" },
+        { title:"How to recognize emotional abuse", desc:"Gaslighting, isolation, control — what they look like and how to respond.", type:"read", category:"boundaries", link:"https://www.youtube.com/results?search_query=emotional+abuse+signs+what+to+do" },
+        { title:"Online dating safety tips", desc:"Profile privacy, first date safety, and how to spot a catfish.", type:"read", category:"dating", link:"https://www.youtube.com/results?search_query=online+dating+safety+tips+red+flags" },
+        { title:"How to support a grieving friend", desc:"What to say, what to avoid, and how to show up without making it awkward.", type:"read", category:"friendship", link:"https://www.youtube.com/results?search_query=how+to+support+someone+who+is+grieving" },
+        { title:"Attachment styles and why they shape relationships", desc:"Secure, anxious, avoidant — understanding your patterns changes everything.", type:"video", category:"communication", link:"https://www.youtube.com/results?search_query=attachment+styles+relationships+explained" },
+      ]
+    },
+    housing: {
+      label: 'Housing', color: '#0d9488',
+      sub: 'Renting, buying, and taking care of the place you live — without getting ripped off',
+      filters: ['all','renting','buying','maintenance','moving','safety','rights'],
+      resources: [
+        { title:"Renting for the first time: everything you need to know", desc:"Applications, credit checks, deposits, leases — what to expect and what to avoid.", type:"video", category:"renting", link:"https://www.youtube.com/results?search_query=first+time+renter+guide+tips" },
+        { title:"Red flags when viewing an apartment", desc:"Mold, pest signs, bad water pressure, and shady landlords — what to look for.", type:"video", category:"renting", link:"https://www.youtube.com/results?search_query=apartment+red+flags+what+to+look+for" },
+        { title:"Home buying step by step", desc:"Pre-approval, offers, inspections, closing — the full process in plain English.", type:"video", category:"buying", link:"https://www.youtube.com/results?search_query=home+buying+process+step+by+step+beginners" },
+        { title:"How to change a lightbulb, a fuse, and a circuit breaker", desc:"The basics of home electrical that every renter and owner should know.", type:"video", category:"maintenance", link:"https://www.youtube.com/results?search_query=how+to+change+fuse+circuit+breaker+home" },
+        { title:"How to fix a running toilet", desc:"The flapper, the float, the fill valve — what goes wrong and how to fix it.", type:"video", category:"maintenance", link:"https://www.youtube.com/results?search_query=how+to+fix+running+toilet+diy" },
+        { title:"Moving checklist: before, during, and after", desc:"What to do 8 weeks out, 1 week out, moving day, and your first week in.", type:"read", category:"moving", link:"https://www.youtube.com/results?search_query=moving+checklist+tips+organized" },
+        { title:"How to get your security deposit back", desc:"Document everything, know the law, and what to do if your landlord refuses.", type:"video", category:"rights", link:"https://www.youtube.com/results?search_query=how+to+get+security+deposit+back+tips" },
+        { title:"How to deal with noisy or bad neighbors", desc:"When to talk directly, when to involve the landlord, and when to call the city.", type:"read", category:"renting", link:"https://www.youtube.com/results?search_query=how+to+deal+with+bad+neighbors+tips" },
+        { title:"Home fire safety basics", desc:"Smoke alarms, fire extinguishers, escape plans — what every household needs.", type:"video", category:"safety", link:"https://www.youtube.com/results?search_query=home+fire+safety+basics+prevention" },
+        { title:"Renters insurance explained", desc:"What it covers, what it doesn't, and why it's worth the $15 a month.", type:"video", category:"renting", link:"https://www.youtube.com/results?search_query=renters+insurance+explained+what+it+covers" },
+        { title:"How to paint a room properly", desc:"Prep, primer, technique, and cleanup — do it yourself without making a mess.", type:"video", category:"maintenance", link:"https://www.youtube.com/results?search_query=how+to+paint+a+room+properly+beginners" },
+        { title:"Understanding utility bills", desc:"Electricity, gas, water — how to read them, lower them, and avoid scams.", type:"video", category:"renting", link:"https://www.youtube.com/results?search_query=how+to+read+utility+bills+lower+costs" },
+      ]
+    },
+  },
+
+  // Spanish overrides — localized links where available, English fallback otherwise
+  es: {
+    money: {
+      label: 'Dinero', color: '#c9a84c',
+      sub: 'Guias, videos y herramientas para tomar control de tus finanzas',
+      filters: ['all','presupuesto','ahorro','banca','credito','deuda','inversion','impuestos','vivienda'],
+      resources: [
+        { title:"Tu primer presupuesto en 30 minutos", desc:"Hoja de trabajo para planificar ingresos vs gastos.", type:"pdf", category:"presupuesto", link:"https://consumer.gov/es/section/dinero-y-finanzas" },
+        { title:"La regla 50/30/20 explicada", desc:"Como dividir tu sueldo para necesidades, deseos y ahorros.", type:"video", category:"presupuesto", link:"https://www.youtube.com/watch?v=rn7RpXM1G0Y" },
+        { title:"Como abrir una cuenta bancaria sin comisiones", desc:"Opciones de cuentas gratuitas y bancos en linea.", type:"read", category:"banca", link:"https://www.consumerfinance.gov/es/herramientas/pregunta-a-cfpb/como-puedo-abrir-una-cuenta-bancaria-es-949/" },
+        { title:"Entendiendo tu puntaje de credito", desc:"Que es, por que importa y cinco cosas que lo afectan desde hoy.", type:"video", category:"credito", link:"https://www.youtube.com/watch?v=Tq7HvpVKlrA" },
+        { title:"Salir de deudas: un plan inicial", desc:"Metodo avalancha vs. bola de nieve — cual te funciona mejor.", type:"read", category:"deuda", link:"https://www.consumerfinance.gov/es/herramientas/pregunta-a-cfpb/cuales-son-las-diferencias-entre-el-metodo-de-avalancha-y-el-de-bola-de-nieve-para-pagar-deudas-es-1823/" },
+        { title:"Como empezar a ahorrar", desc:"Por que tener un fondo de emergencia puede cambiar tu vida.", type:"read", category:"ahorro", link:"https://www.consumerfinance.gov/es/herramientas/pregunta-a-cfpb/que-es-un-fondo-de-emergencia-y-cuanto-deberia-ahorrar-es-1053/" },
+        { title:"Inversion para principiantes", desc:"Acciones, bonos, fondos indexados — en lenguaje simple.", type:"video", category:"inversion", link:"https://www.youtube.com/watch?v=TZHrCH0ZH-o" },
+        { title:"Como declarar impuestos gratis", desc:"VITA, Free File del IRS y formas de presentar tu declaracion sin costo.", type:"read", category:"impuestos", link:"https://www.irs.gov/es/file-your-taxes-for-free" },
+        { title:"Alquilar vs. comprar vivienda", desc:"Una guia sencilla para evaluar tus opciones de vivienda.", type:"read", category:"vivienda", link:"https://www.consumerfinance.gov/es/herramientas/pregunta-a-cfpb/cuales-son-los-pasos-para-comprar-una-casa-es-169/" },
+        { title:"Construir credito desde cero", desc:"Tarjetas aseguradas, prestamos para credito explicados.", type:"read", category:"credito", link:"https://www.consumerfinance.gov/es/herramientas/pregunta-a-cfpb/como-puedo-establecer-credito-por-primera-vez-es-1102/" },
+        { title:"Como funcionan las cuentas de ahorro", desc:"Interes compuesto, APY y que tipo de cuenta conviene.", type:"read", category:"ahorro", link:"https://www.consumerfinance.gov/es/herramientas/pregunta-a-cfpb/que-es-una-cuenta-de-ahorros-es-5399/" },
+        { title:"Hoja de desglose de tu cheque", desc:"Descarga este PDF para entender a donde va tu dinero.", type:"pdf", category:"presupuesto", link:"https://consumer.gov/es/section/dinero-y-finanzas" },
+      ]
+    },
+    women: {
+      label: 'Mujeres', color: '#ec4899',
+      sub: 'Salud, derechos, finanzas y habilidades importantes para la mujer',
+      filters: ['all','salud','finanzas','seguridad','carrera','cuidado personal','derechos'],
+      resources: [
+        { title:"Entendiendo tu ciclo menstrual", desc:"Que es normal, que no lo es y como hacer seguimiento para tu salud.", type:"read", category:"salud", link:"https://www.youtube.com/results?search_query=ciclo+menstrual+explicado+salud" },
+        { title:"Autoexamen de seno — como y cuando", desc:"Una rutina mensual simple que podria ser una de las cosas mas importantes.", type:"read", category:"salud", link:"https://www.youtube.com/results?search_query=autoexamen+mama+como+hacer" },
+        { title:"La brecha salarial de genero", desc:"Conoce tu valor y entiende tus derechos legales.", type:"read", category:"finanzas", link:"https://www.dol.gov/agencies/wb" },
+        { title:"Mujeres e inversion: como empezar", desc:"Por que las mujeres invierten menos y como cerrar esa brecha hoy.", type:"video", category:"finanzas", link:"https://www.youtube.com/watch?v=fJxNHVfMsDg" },
+        { title:"Seguridad personal para mujeres", desc:"Conciencia situacional, desescalada y cuando confiar en tu instinto.", type:"read", category:"seguridad", link:"https://www.thehotline.org/es/" },
+        { title:"Tus derechos en el trabajo como mujer", desc:"Discriminacion, licencia de maternidad, acoso — que protege la ley.", type:"read", category:"derechos", link:"https://www.eeoc.gov/es/discriminacion-por-embarazo" },
+        { title:"Rutina de cuidado de la piel (cualquier presupuesto)", desc:"Limpiador, hidratante, protector solar — una rutina simple.", type:"video", category:"cuidado personal", link:"https://www.youtube.com/watch?v=OrElyY7MFVs" },
+        { title:"Salud del suelo pelvico", desc:"Por que importa, senales de disfuncion y ejercicios que ayudan.", type:"read", category:"salud", link:"https://www.womenshealth.gov/a-z-topics/pelvic-floor-disorders" },
+        { title:"Ahorrar siendo mujer independiente", desc:"Pasos practicos para construir independencia financiera con cualquier ingreso.", type:"read", category:"finanzas", link:"https://www.consumerfinance.gov/es/herramientas/pregunta-a-cfpb/que-es-un-fondo-de-emergencia-y-cuanto-deberia-ahorrar-es-1053/" },
+        { title:"Citologia vaginal (Papanicolau) explicada", desc:"Que se revisa, cada cuanto se necesita y que esperar.", type:"read", category:"salud", link:"https://www.youtube.com/results?search_query=papanicolau+que+es+como+funciona" },
+        { title:"Como negociar tu salario como mujer", desc:"Estrategias para cerrar la brecha y abogar por ti.", type:"video", category:"carrera", link:"https://www.youtube.com/watch?v=J8JYoqEiHcQ" },
+        { title:"Recursos gratuitos para mujeres que escapan del abuso", desc:"Lineas de ayuda, refugios, asistencia legal y plan de seguridad.", type:"read", category:"seguridad", link:"https://www.thehotline.org/es/" },
+      ]
+    },
+    men: {
+      label: 'Hombres', color: '#0ea5e9',
+      sub: 'Salud, aseo, emociones y habilidades de vida para hombres',
+      filters: ['all','salud','aseo','salud mental','finanzas','relaciones'],
+      resources: [
+        { title:"Como afeitarse correctamente", desc:"Preparacion, tecnica y cuidado posterior.", type:"video", category:"aseo", link:"https://www.youtube.com/watch?v=8GIhpZCBFoI" },
+        { title:"Como aplicar colonia correctamente", desc:"Donde aplicar, cuanto usar y como lograr que dure todo el dia.", type:"video", category:"aseo", link:"https://www.youtube.com/watch?v=z1qLsXYv8Kk" },
+        { title:"Salud mental masculina: por que es dificil pedir ayuda", desc:"El estigma, como funciona la terapia y como empezar.", type:"read", category:"salud mental", link:"https://www.nimh.nih.gov/es/health/topics/men-and-mental-health" },
+        { title:"Autoexamen testicular — como y cuando", desc:"Una revision mensual rapida que puede detectar problemas temprano.", type:"read", category:"salud", link:"https://www.youtube.com/results?search_query=autoexamen+testicular+como+hacer" },
+        { title:"Depresion en hombres: como se manifiesta realmente", desc:"Como la depresion se presenta diferente en hombres.", type:"video", category:"salud mental", link:"https://www.youtube.com/watch?v=yCzuL9WvkYU" },
+        { title:"Como ganar masa muscular — guia para principiantes", desc:"Conceptos basicos de sobrecarga progresiva, recuperacion y alimentacion.", type:"video", category:"salud", link:"https://www.youtube.com/watch?v=R6A0vULUFUk" },
+        { title:"Salud de la prostata explicada", desc:"Cuando empezar con las revisiones y factores de riesgo.", type:"read", category:"salud", link:"https://www.youtube.com/results?search_query=prostata+salud+prevencion+cancer" },
+        { title:"Como construir amistades masculinas saludables", desc:"Por que las amistades masculinas disminuyen y como reconstruirlas.", type:"read", category:"relaciones", link:"https://www.youtube.com/results?search_query=como+hacer+amigos+hombres+adultos" },
+        { title:"Cuidado basico de la piel para hombres", desc:"Limpiador, hidratante y protector solar — una rutina sencilla.", type:"video", category:"aseo", link:"https://www.youtube.com/watch?v=kzGJXRhEBqk" },
+        { title:"Independencia financiera para hombres", desc:"Seguro, testamento, retiro — cosas que los hombres estadisticamente posponen.", type:"read", category:"finanzas", link:"https://www.youtube.com/results?search_query=financial+planning+tips+men+insurance+retirement" },
+        { title:"Como hablar sobre sentimientos", desc:"Herramientas de lenguaje practico para expresar emociones.", type:"read", category:"relaciones", link:"https://www.youtube.com/results?search_query=hombres+hablar+sobre+emociones+sentimientos" },
+        { title:"Perdida de cabello: cuales son tus opciones", desc:"Desde cambios de estilo de vida hasta tratamientos.", type:"read", category:"aseo", link:"https://www.youtube.com/results?search_query=perdida+cabello+tratamientos+opciones" },
+      ]
+    },
+    parenting: {
+      label: 'Crianza', color: '#f59e0b',
+      sub: 'Nadie nace sabiendo como ser padre o madre — lo basico, gratis',
+      filters: ['all','recien nacido','bebe','nino','adolescentes','dinero','bienestar'],
+      resources: [
+        { title:"La primera semana en casa con tu bebe", desc:"Sueno, alimentacion, cuidado del cordon umbilical y cuando llamar al medico.", type:"read", category:"recien nacido", link:"https://www.youtube.com/results?search_query=cuidado+recien+nacido+primera+semana" },
+        { title:"Como envolver a un recien nacido", desc:"Tecnica paso a paso que ayuda a los bebes a dormir de forma mas segura.", type:"video", category:"recien nacido", link:"https://www.youtube.com/watch?v=dFRHDT-lw5w" },
+        { title:"Sueno seguro para bebes (prevencion de SMSL)", desc:"Boca arriba, colchon firme, sin objetos sueltos.", type:"read", category:"recien nacido", link:"https://www.nichd.nih.gov/espanol/temas/sids/informacion" },
+        { title:"Como manejar las rabietas de los ninos pequenos", desc:"Que pasa en su cerebro y como responder sin perder la calma.", type:"video", category:"bebe", link:"https://www.youtube.com/watch?v=7N2JcfpjIFg" },
+        { title:"Introduccion de alimentos solidos", desc:"Cuando empezar, que probar primero y que alimentos evitar en el primer ano.", type:"read", category:"bebe", link:"https://www.youtube.com/results?search_query=introduccion+alimentos+solidos+bebe" },
+        { title:"Como hablar con los ninos sobre las emociones", desc:"Lenguaje adecuado por edad para ayudar a los ninos a procesar sentimientos.", type:"read", category:"nino", link:"https://www.youtube.com/results?search_query=hablar+ninos+sobre+emociones+sentimientos" },
+        { title:"Como criar ninos lectores desde el nacimiento", desc:"Habilidades de lenguaje y lectura desde el primer dia — actividades gratuitas.", type:"read", category:"nino", link:"https://www.youtube.com/results?search_query=crianza+lectores+bebe+lenguaje" },
+        { title:"Como hablar con los adolescentes", desc:"Estrategias para mantener los canales abiertos durante los anos dificiles.", type:"read", category:"adolescentes", link:"https://www.youtube.com/results?search_query=como+hablar+con+adolescentes+consejos" },
+        { title:"Salud mental de los adolescentes: senales de alerta", desc:"Que observar, como iniciar la conversacion y donde obtener ayuda.", type:"read", category:"adolescentes", link:"https://www.youtube.com/results?search_query=salud+mental+adolescentes+senales+alerta" },
+        { title:"Presupuesto para un bebe: cuanto cuesta realmente", desc:"Desglose honesto de costos del primer ano.", type:"read", category:"dinero", link:"https://www.youtube.com/results?search_query=cuanto+cuesta+tener+un+bebe+presupuesto" },
+        { title:"Recursos gratuitos para padres", desc:"WIC, SNAP, Head Start, Medicaid — a que calificas y como solicitarlo.", type:"read", category:"dinero", link:"https://www.benefits.gov/es/categories/Familias%20y%20ni%C3%B1os" },
+        { title:"El agotamiento parental: es real y es comun", desc:"Senales de que estas al limite y como sobrellevarlo.", type:"read", category:"bienestar", link:"https://www.youtube.com/results?search_query=agotamiento+parental+burnout+como+manejar" },
+      ]
+    },
+    health: {
+      label: 'Salud', color: '#22c55e',
+      sub: 'Conoce tu cuerpo, entiende tus opciones y cuidate',
+      filters: ['all','basicos','salud mental','medicos','ejercicio','nutricion'],
+      resources: [
+        { title:"Como leer una etiqueta de medicamento", desc:"Dosis, recetas y advertencias — que significa cada abreviatura.", type:"read", category:"basicos", link:"https://www.fda.gov/drugs/recursos-en-espanol" },
+        { title:"Que hacer cuando no puedes pagar un medico", desc:"Clinicas gratuitas, centros de salud comunitarios y atencion de tarifa escalonada.", type:"read", category:"medicos", link:"https://findahealthcenter.hrsa.gov/" },
+        { title:"Salud mental: una guia para principiantes", desc:"Ansiedad, depresion y estres — que son y cuando buscar ayuda.", type:"video", category:"salud mental", link:"https://www.youtube.com/watch?v=rkZl2gsLUp4" },
+        { title:"Como hacer ejercicio sin equipo", desc:"Un entrenamiento completo para principiantes que puedes hacer en cualquier lugar.", type:"video", category:"ejercicio", link:"https://www.youtube.com/watch?v=OPLTMcS6wHM" },
+        { title:"Como leer una etiqueta nutricional", desc:"Porciones, valores diarios y que buscar realmente en la etiqueta.", type:"read", category:"nutricion", link:"https://www.fda.gov/food/recursos-en-espanol/como-entender-y-usar-la-etiqueta-de-informacion-nutricional" },
+        { title:"Ayuda gratuita para salud mental", desc:"Lineas de crisis, apps de terapia gratuita y consejeros de tarifa escalonada.", type:"read", category:"salud mental", link:"https://www.nami.org/help" },
+        { title:"Primeros auxilios basicos que todos deberian saber", desc:"RCP, asfixia, quemaduras, cortes — que hacer antes de que llegue la ambulancia.", type:"video", category:"basicos", link:"https://www.redcross.org/es/tomar-una-clase/primeros-auxilios.html" },
+        { title:"Como conseguir seguro medico gratis o barato", desc:"Medicaid, CHIP, mercado ACA y a que calificas realmente.", type:"read", category:"medicos", link:"https://www.healthcare.gov/es/lower-costs/" },
+      ]
+    },
+    work: {
+      label: 'Trabajo', color: '#a855f7',
+      sub: 'Consigue el trabajo, mantelo y crece — sin contactos',
+      filters: ['all','curriculum','entrevistas','trabajo','derechos','carrera'],
+      resources: [
+        { title:"Como escribir un curriculum desde cero", desc:"Formato, que incluir y como destacar incluso sin experiencia.", type:"read", category:"curriculum", link:"https://www.youtube.com/results?search_query=como+hacer+curriculum+vitae+desde+cero" },
+        { title:"Como escribir una carta de presentacion", desc:"Que decir, que tan larga debe ser y una plantilla gratuita.", type:"read", category:"curriculum", link:"https://www.youtube.com/results?search_query=como+escribir+carta+de+presentacion+trabajo" },
+        { title:"Preguntas comunes de entrevistas respondidas", desc:"Hablame de ti, cual es tu debilidad — y como responderlas bien.", type:"video", category:"entrevistas", link:"https://www.youtube.com/watch?v=HG68Ymazo18" },
+        { title:"Que ponerse en una entrevista de trabajo", desc:"Business casual vs. formal — como vestirte para cualquier empleo.", type:"read", category:"entrevistas", link:"https://www.youtube.com/results?search_query=que+usar+entrevista+de+trabajo+vestimenta" },
+        { title:"Como negociar tu salario", desc:"Que decir, cuando decirlo y como conseguir lo que mereces.", type:"video", category:"trabajo", link:"https://www.youtube.com/watch?v=XY5SeCl_8NE" },
+        { title:"Tus derechos laborales explicados", desc:"Salario minimo, descansos, discriminacion y lo que tu empleador no puede hacer.", type:"read", category:"derechos", link:"https://www.dol.gov/agencies/whd/spanish" },
+        { title:"Como pedir un aumento de sueldo", desc:"Momento oportuno, palabras adecuadas y como argumentarlo sin sentirte incomodo.", type:"read", category:"trabajo", link:"https://www.youtube.com/results?search_query=como+pedir+aumento+de+sueldo" },
+        { title:"Herramientas gratuitas para crear tu curriculum", desc:"Las mejores herramientas gratuitas para un curriculum profesional en minutos.", type:"read", category:"curriculum", link:"https://www.canva.com/es_mx/curriculums/" },
+      ]
+    },
+    food: {
+      label: 'Comida', color: '#f97316',
+      sub: 'Come bien con poco dinero — cocinar es un superpoder que todos pueden aprender',
+      filters: ['all','basicos','presupuesto','meal prep','nutricion'],
+      resources: [
+        { title:"10 comidas que puedes hacer por menos de $2", desc:"Baratas, nutritivas y deliciosas — con instrucciones paso a paso.", type:"video", category:"presupuesto", link:"https://www.youtube.com/watch?v=hBbQBkFQbKY" },
+        { title:"Como preparar comida para la semana", desc:"Cocina una vez, come toda la semana — guia para principiantes.", type:"video", category:"meal prep", link:"https://www.youtube.com/watch?v=R4A4pFgxoGI" },
+        { title:"Habilidades con el cuchillo para principiantes", desc:"Como sostener el cuchillo, cortar con seguridad y picar cada verdura.", type:"video", category:"basicos", link:"https://www.youtube.com/watch?v=JMA2SqaDgG8" },
+        { title:"Como leer una etiqueta nutricional", desc:"Entiende que contienen tus alimentos y haz mejores elecciones.", type:"read", category:"nutricion", link:"https://www.fda.gov/food/recursos-en-espanol/como-entender-y-usar-la-etiqueta-de-informacion-nutricional" },
+        { title:"Compras del super con presupuesto ajustado", desc:"Que comprar, que evitar y como estirar $30 para toda la semana.", type:"read", category:"presupuesto", link:"https://www.youtube.com/results?search_query=compras+supermercado+presupuesto+tips" },
+        { title:"5 tecnicas basicas de cocina", desc:"Saltear, hervir, hornear, cocinar al vapor, freir — dominalas y podras hacer casi todo.", type:"video", category:"basicos", link:"https://www.youtube.com/watch?v=Fqy1V5vN5S4" },
+        { title:"Como almacenar alimentos de forma segura", desc:"Que va al refrigerador y como evitar intoxicaciones alimentarias.", type:"read", category:"basicos", link:"https://www.foodsafety.gov/es/mantener-los-alimentos-seguros/foodkeeper-app" },
+        { title:"Programas de asistencia alimentaria gratuita", desc:"SNAP, bancos de alimentos y WIC — como aplicar y que puedes obtener.", type:"read", category:"presupuesto", link:"https://www.benefits.gov/es/benefit/361" },
+      ]
+    },
+    tech: {
+      label: 'Tecnologia', color: '#06b6d4',
+      sub: 'Mantente seguro, ahorra tiempo y saca el maximo provecho de la tecnologia',
+      filters: ['all','seguridad','basicos','internet','telefono','herramientas'],
+      resources: [
+        { title:"Como detectar una estafa por correo o texto", desc:"Phishing, enlaces falsos y las senales de alerta que delatan a los estafadores.", type:"read", category:"seguridad", link:"https://consumer.ftc.gov/es/articulos/como-reconocer-y-denunciar-mensajes-de-texto-spam" },
+        { title:"Como crear una contrasena segura", desc:"Que hace segura una contrasena y como administrarlas sin olvidarlas.", type:"read", category:"seguridad", link:"https://www.consumer.ftc.gov/es/articulos/como-crear-contrasenas-seguras" },
+        { title:"Habilidades basicas de computadora para principiantes", desc:"Archivos, carpetas, copiar-pegar, capturas de pantalla — lo esencial.", type:"video", category:"basicos", link:"https://www.youtube.com/watch?v=aN7FG2bPVlw" },
+        { title:"Como usar Google de forma efectiva", desc:"Consejos, atajos y trucos para encontrar cualquier cosa en segundos.", type:"read", category:"internet", link:"https://www.youtube.com/results?search_query=how+to+use+google+search+effectively+tips?hl=es" },
+        { title:"Como proteger tu privacidad en linea", desc:"Configuracion del navegador, VPNs y que saben realmente las empresas de ti.", type:"read", category:"seguridad", link:"https://www.youtube.com/results?search_query=privacidad+en+linea+proteccion+internet" },
+        { title:"Herramientas gratuitas que todos deberian conocer", desc:"Google Docs, Canva y otras herramientas gratuitas que reemplazan software costoso.", type:"read", category:"herramientas", link:"https://www.youtube.com/results?search_query=best+free+tools+productivity+apps+2024" },
+        { title:"Como hacer una copia de seguridad de tu telefono", desc:"Nunca pierdas tus fotos o contactos — iPhone y Android explicados.", type:"video", category:"telefono", link:"https://www.youtube.com/results?search_query=como+hacer+copia+de+seguridad+del+telefono" },
+        { title:"Como estar seguro en WiFi publico", desc:"Que pueden ver los hackers en redes abiertas y como protegerte.", type:"read", category:"seguridad", link:"https://consumer.ftc.gov/es/articulos/son-seguras-las-redes-wifi-publicas-lo-que-necesita-saber" },
+      ]
+    },
+    life: {
+      label: 'Habilidades', color: '#3b82f6',
+      sub: 'Habilidades cotidianas que hacen la vida adulta mas facil para todos',
+      filters: ['all','ropa','hogar','social','manejo','seguridad'],
+      resources: [
+        { title:"Como hacer el nudo de corbata (5 formas)", desc:"Desde el four-in-hand clasico hasta el Windsor — paso a paso.", type:"video", category:"ropa", link:"https://www.youtube.com/watch?v=pRsQHnkGDkc" },
+        { title:"Como lavar tu ropa", desc:"Temperaturas, separar colores y leer etiquetas de cuidado.", type:"video", category:"ropa", link:"https://www.youtube.com/watch?v=4p_CENKjJAY" },
+        { title:"Como planchar una camisa", desc:"Cuello, punos y cuerpo — sin arrugas en menos de 5 minutos.", type:"video", category:"ropa", link:"https://www.youtube.com/watch?v=KNhk7vKlLgQ" },
+        { title:"Reparaciones basicas del hogar", desc:"Arreglar una llave con fuga, un inodoro y parchear un agujero en la pared.", type:"video", category:"hogar", link:"https://www.youtube.com/results?search_query=reparaciones+basicas+del+hogar+principiantes" },
+        { title:"Como escribir un correo formal", desc:"Estructura, tono y frases para trabajos, arrendadores y tramites.", type:"read", category:"social", link:"https://www.youtube.com/results?search_query=como+escribir+correo+formal+ejemplo" },
+        { title:"Etiqueta en la mesa", desc:"Que tenedor usar y como manejar una comida formal.", type:"read", category:"social", link:"https://www.youtube.com/results?search_query=table+etiquette+manners+basics" },
+        { title:"Como estacionar en paralelo", desc:"Guia visual paso a paso para el estacionamiento en paralelo.", type:"video", category:"manejo", link:"https://www.youtube.com/watch?v=6cECougP-OE" },
+        { title:"Que hacer en una emergencia", desc:"Primeros auxilios basicos, como pedir ayuda y mantener la calma.", type:"read", category:"seguridad", link:"https://www.redcross.org/es/tomar-una-clase/primeros-auxilios.html" },
+        { title:"Como destapar un desague", desc:"Las herramientas y tecnica correcta para banos, lavabos y duchas.", type:"video", category:"hogar", link:"https://www.youtube.com/results?search_query=como+destapar+un+desague" },
+        { title:"Como negociar — cualquier cosa", desc:"Tecnicas para hablar de salario, renta y negociaciones cotidianas.", type:"read", category:"social", link:"https://www.youtube.com/results?search_query=how+to+negotiate+tips+beginners" },
+        { title:"Lista de revision antes de firmar un contrato", desc:"Que buscar, que preguntar y que senales de alerta evitar.", type:"read", category:"hogar", link:"https://www.youtube.com/results?search_query=apartment+checklist+before+signing+lease" },
+        { title:"Como atar los cordones — de verdad", desc:"El nudo Ian y por que siempre se te desatan.", type:"video", category:"ropa", link:"https://www.youtube.com/watch?v=obRSjFCrlsE" },
+      ]
+    },
+  },
 };
 
 let activeCategory = 'money';
 let activeFilter = 'all';
 
-function setCategory(cat, tabEl) {
-  activeCategory = cat; activeFilter = 'all';
-  document.getElementById('searchInput').value = '';
-  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-  tabEl.classList.add('active');
-  const d = allData[cat];
+function openDonation() {
+  const modal = document.getElementById('donateModal');
+  modal.style.display = 'flex';
+  modal.onclick = function(e) { if(e.target===modal) modal.style.display='none'; };
+}
+
+function renderCurrentCategory() {
+  const d = getCategoryData(activeCategory);
+  if (!d) return;
   document.getElementById('sectionDot').style.background = d.color;
   document.getElementById('sectionTitleText').textContent = d.label;
   document.getElementById('sectionSub').textContent = d.sub;
   document.getElementById('statCount').textContent = d.resources.length + '+';
   document.getElementById('statTopics').textContent = d.filters.length - 1;
   renderPills(d.filters, d.color);
-  renderCards(d.resources);
+  activeFilter = 'all';
+  document.getElementById('searchInput').value = '';
+  filterCards();
+}
+
+function setCategory(cat, tabEl) {
+  activeCategory = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  renderCurrentCategory();
 }
 
 function renderPills(filters, color) {
-  const container = document.getElementById('pills');
-  container.innerHTML = filters.map(f => {
-    const isAll = f === 'all';
-    const label = isAll ? 'All' : f.charAt(0).toUpperCase() + f.slice(1);
-    return `<div class="pill${isAll ? ' active' : ''}" onclick="setFilter('${f}',this)"
-      style="${isAll ? 'background:'+color+';border-color:'+color : ''}">${label}</div>`;
-  }).join('');
+  var container = document.getElementById('pills');
+  container.innerHTML = '';
+  filters.forEach(function(f) {
+    var label = f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1);
+    var isAll = f === 'all';
+    var div = document.createElement('div');
+    div.className = 'pill' + (isAll ? ' active' : '');
+    div.textContent = label;
+    if (isAll) { div.style.background = color; div.style.borderColor = color; div.style.color = '#fff'; }
+    (function(val){ div.onclick = function() { setFilter(val, div); }; })(f);
+    container.appendChild(div);
+  });
 }
 
 function setFilter(cat, el) {
   activeFilter = cat;
-  const color = allData[activeCategory].color;
+  const color = getCategoryData(activeCategory).color;
   document.querySelectorAll('.pill').forEach(p => {
     p.classList.remove('active');
-    p.style.background = ''; p.style.borderColor = ''; p.style.color = '';
+    p.style.background=''; p.style.borderColor=''; p.style.color='';
   });
   el.classList.add('active');
-  el.style.background = color; el.style.borderColor = color; el.style.color = '#fff';
+  el.style.background=color; el.style.borderColor=color; el.style.color='#fff';
   filterCards();
 }
 
@@ -369,34 +744,38 @@ function typeLabel(t) {
 
 function actionBtn(type, link, color) {
   if (!link) return '';
-  const icons = { video:'ti-player-play', pdf:'ti-download', read:'ti-arrow-right' };
-  const labels = { video:'Watch', pdf:'Download', read:'Read' };
-  const icon = icons[type] || 'ti-arrow-right';
-  const label = labels[type] || 'Open';
-  return `<a href="${link}" target="_blank" rel="noopener" class="card-btn"
-    style="background:${color};border-color:${color}">
-    <i class="ti ${icon}" aria-hidden="true"></i> ${label}</a>`;
+  var icons = {video:'ti-player-play', pdf:'ti-download', read:'ti-arrow-right'};
+  var labels = {video:'Watch', pdf:'Download', read:'Read'};
+  var a = document.createElement('a');
+  a.href = link; a.target = '_blank'; a.rel = 'noopener'; a.className = 'card-btn';
+  a.style.background = color; a.style.borderColor = color;
+  a.innerHTML = '<i class="ti ' + (icons[type]||'ti-arrow-right') + '" aria-hidden="true"></i> ' + (labels[type]||'Open');
+  return a.outerHTML;
 }
 
 function renderCards(list) {
-  const grid = document.getElementById('resourcesGrid');
-  const color = allData[activeCategory].color;
-  if (!list.length) { grid.innerHTML = '<p class="empty-msg">No resources found. Try a different search or filter.</p>'; return; }
-  grid.innerHTML = list.map(r => `
-    <div class="resource-card" style="--card-color:${color}">
-      ${typeLabel(r.type)}
-      <div class="card-title">${r.title}</div>
-      <div class="card-desc">${r.desc}</div>
-      <div class="card-footer">
-        <span class="card-category">${r.category}</span>
-        <div class="card-actions">${actionBtn(r.type, r.link, color)}</div>
-      </div>
-    </div>`).join('');
+  var grid = document.getElementById('resourcesGrid');
+  var color = getCategoryData(activeCategory).color;
+  if (!list.length) {
+    grid.innerHTML = '<p class="empty-msg">No resources found. Try a different search or filter.</p>';
+    return;
+  }
+  grid.innerHTML = list.map(function(r) {
+    return '<div class="resource-card" style="--card-color:' + color + '">' +
+      typeLabel(r.type) +
+      '<div class="card-title">' + r.title + '</div>' +
+      '<div class="card-desc">' + r.desc + '</div>' +
+      '<div class="card-footer">' +
+        '<span class="card-category">' + r.category + '</span>' +
+        actionBtn(r.type, r.link, color) +
+      '</div></div>';
+  }).join('');
 }
 
 function filterCards() {
   const q = document.getElementById('searchInput').value.toLowerCase();
-  const d = allData[activeCategory];
+  const d = getCategoryData(activeCategory);
+  if (!d) return;
   renderCards(d.resources.filter(r => {
     const mf = activeFilter==='all' || r.category===activeFilter;
     const ms = !q || r.title.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q) || r.category.includes(q);
@@ -410,14 +789,33 @@ function selectAmount(el, amt) {
   document.getElementById('donateAmt').textContent = amt;
 }
 
-// init
-const d = allData.money;
-document.getElementById('sectionDot').style.background = d.color;
-document.getElementById('sectionSub').textContent = d.sub;
-document.getElementById('statCount').textContent = d.resources.length + '+';
-document.getElementById('statTopics').textContent = d.filters.length - 1;
-renderPills(d.filters, d.color);
-renderCards(d.resources);
+renderCurrentCategory();
 </script>
+
+  <!-- Donation modal -->
+  <div id="donateModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:16px;padding:2rem;max-width:420px;width:90%;position:relative">
+      <button onclick="document.getElementById('donateModal').style.display='none'"
+        style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#888">&#x2715;</button>
+      <h3 style="color:#0a1628;margin-bottom:0.5rem;font-size:20px">Support Finora</h3>
+      <p style="color:#666;font-size:13px;margin-bottom:1.2rem;line-height:1.6">
+        Finora is free for everyone. To accept donations, add your payment link below — 
+        PayPal, Stripe, Ko-fi, Buy Me a Coffee, or any other platform you use.
+      </p>
+      <div style="background:#f0f4ff;border-radius:10px;padding:1rem;margin-bottom:1rem">
+        <p style="font-size:12px;color:#3b60d4;margin-bottom:0.4rem;font-weight:600">&#128161; To activate donations:</p>
+        <p style="font-size:12px;color:#555;line-height:1.6">
+          Replace the <code style="background:#e2e8ff;padding:1px 5px;border-radius:4px">openDonation()</code> function in the script 
+          with a link to your payment page, e.g.:<br>
+          <code style="background:#e2e8ff;padding:1px 5px;border-radius:4px;font-size:11px">window.open('https://ko-fi.com/yourname')</code>
+        </p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="https://ko-fi.com" target="_blank" style="flex:1;text-align:center;padding:9px;background:#ff5e5b;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">Ko-fi</a>
+        <a href="https://www.buymeacoffee.com" target="_blank" style="flex:1;text-align:center;padding:9px;background:#ffdd00;color:#000;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">Buy Me a Coffee</a>
+        <a href="https://www.paypal.com" target="_blank" style="flex:1;text-align:center;padding:9px;background:#003087;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">PayPal</a>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
